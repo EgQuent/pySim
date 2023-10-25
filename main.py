@@ -9,7 +9,6 @@ class Simulator:
         self.mesh = None
         self.solver = None
         self.post_processor = None
-        self.export_type = []
 
     def set_mesh(self, lx, ly, dx, dy):
         self.mesh = Mesh(lx, ly, dx, dy)
@@ -26,11 +25,10 @@ class Simulator:
         self.solver.set_value('diffusivity', value, restriction)
         self.solver.update_diffusity_matrix()
 
-    def set_post_processor(self, path = ".//", export_type = ["CSV"]):
-        self.post_processor = PostProcessor(self.solver, path)
-        self.export_type = export_type
+    def set_post_processor(self, path = ".//", export_type = ["csv"]):
+        self.post_processor = PostProcessor(self.solver, path, export_type)
 
-    def run(self, time_step=10, time=None, export_step=0):
+    def run(self, time_step=10, time=None, export=True, export_step=0):
         if time is not None :
             time_step = int(time / self.solver.dt) +1
         count_step = 0
@@ -40,13 +38,14 @@ class Simulator:
         for _ in range (0,time_step):
             count_step += 1
             self.solver.do_timestep()
-            if export_step != 0 and count_step % export_step == 0:
+            if export == True and export_step != 0 and count_step % export_step == 0:
                 print(f"RUN : t= {round(self.solver.crt_time,2)}s")
                 self.post_processor.print_matrix()
         final_time = round(time_step*self.solver.dt,2)
         print(f"RUN : t= {final_time}s")
         self.post_processor.print_matrix()
-        self.post_processor.export_csv()
+        if export :
+            self.post_processor.export()
         return final_time
 
 
@@ -56,9 +55,9 @@ class Simulator:
 if __name__ == "__main__":
 
     sim = Simulator()
-    sim.set_mesh(10, 10, 1, 1)
+    sim.set_mesh(100, 100, 1, 1)
     sim.set_solver()
-    sim.set_temperature(60, ((0,5),(11,11)))
-    # sim.set_thermal_diffusivity(HeatSolver.D_WATER, ((0,5),(11,11)))
-    sim.set_post_processor()
-    sim.run(time=240,export_step=50)
+    sim.set_temperature(60, ((0,50),(101,101)))
+    # sim.set_thermal_diffusivity(HeatSolver.D_WATER, ((0,50),(101,101)))
+    sim.set_post_processor(export_type=["img"])
+    sim.run(time=3600, export = True, export_step=0)

@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from mesh import Mesh
 from tools import is_in_rectangle, is_rectangle
 
