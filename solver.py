@@ -5,12 +5,10 @@ from tools import is_in_rectangle, is_rectangle
 
 class BasicSolver:
 
-    def __init__(self, mesh):
-        if isinstance(mesh, Mesh):
-            self.mesh = mesh
-        else:
-            TypeError
+    def __init__(self, mesh: Mesh):
+        self.mesh = mesh
         self.dx2, self.dy2 = self.mesh.dx**2, self.mesh.dy**2
+        self.crt_time = 0
 
     def set_value(self, key, value, restriction=None):
         """Restriction is a rectangle defined by a couple of coordinates [[x1,y1],[x2,y2]]"""
@@ -57,6 +55,7 @@ class HeatSolver(BasicSolver):
         for i in range(0, self.mesh.nx):
             for j in range(0, self.mesh.ny):
                 self.d[i+1,j+1] = self.mesh.mesh[i][j].values['diffusivity']
+        self.dt = self.dx2 * self.dy2 / (2 * self.d.max() * (self.dx2 + self.dy2))
 
     def do_timestep(self):
         # Propagate with forward-difference in time, central-difference in space
@@ -65,11 +64,10 @@ class HeatSolver(BasicSolver):
             (u0[2:, 1:-1] - 2*u0[1:-1, 1:-1] + u0[:-2, 1:-1])/self.dx2
             + (u0[1:-1, 2:] - 2*u0[1:-1, 1:-1] + u0[1:-1, :-2])/self.dy2 )
         self.update_border_temperature_matrix()
+        self.crt_time += self.dt
         return u0
     
-    def run(self, time_step=10, time=None):
-        if time is not None :
-            time_step = int(time / self.dt) +1
+    def run(self, time_step=10):
         self.update_border_temperature_matrix()
         print("INIT t= 0s")
         print(self.u)
@@ -86,11 +84,10 @@ if __name__ == "__main__":
     test_mesh = Mesh(10, 10, 1, 1)
     test_mesh.create()
     test_solver = HeatSolver(test_mesh)
-    #test_solver.set_temperature(60, ((0,5),(11,11)))
-    #test_solver.update_temperature_matrix()
-    #test_solver.set_thermal_diffusivity(test_solver.D_WATER, ((0,5),(11,11)))
-    #test_solver.update_diffusity_matrix()
-    test_solver.run(time=180)
+    test_solver.set_temperature(60, ((0,5),(11,11)))
+    test_solver.update_temperature_matrix()
+    test_solver.set_thermal_diffusivity(test_solver.D_WATER, ((0,5),(11,11)))
+    test_solver.update_diffusity_matrix()
 
 
 

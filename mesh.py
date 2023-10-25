@@ -21,6 +21,7 @@ class Mesh:
         self.dx, self.dy = dx, dy
         self.nx, self.ny = int(lx/dx), int(ly/dy)
         self.mesh = []
+        self.storage = []
 
     def create(self):
         for j in range (0, self.ny):
@@ -50,7 +51,6 @@ class Mesh:
                 y.append(node.y)
         plt.scatter(x, y)
         plt.show()
-
 
 if __name__ == "__main__":
     test_mesh = Mesh(10, 10, 1, 1)
